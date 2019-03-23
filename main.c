@@ -4,27 +4,17 @@
 #include <unistd.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <curses.h>
 
-static const char on = 'a';
-static const char off = '*';
-
-size_t safe_op(const int64_t index, const int64_t dim)
+size_t try_wrap(const int64_t index, const int64_t dim)
 {
     return (index + dim) % dim;
-}
-
-bool alive(
-    const size_t row, const size_t col,
-    const size_t rows, const size_t cols,
-    const char board[rows][cols])
-{
-    return board[row][col] == on;
 }
 
 size_t alive_neighbors(
     const size_t row, const size_t col,
     const size_t rows, const size_t cols,
-    const char board[rows][cols])
+    const bool board[rows][cols])
 {
     typedef struct adjust_t
     {
@@ -43,10 +33,9 @@ size_t alive_neighbors(
     size_t living = 0;
     for (size_t i = 0; i < 8; i++)
     {
-        living += alive(
-            safe_op((int64_t)row + adjusts[i].r, (int64_t)rows),
-            safe_op((int64_t)col + adjusts[i].c, (int64_t)cols),
-            rows, cols, board);
+        living += board
+            [try_wrap((int64_t)row + adjusts[i].r, (int64_t)rows)]
+            [try_wrap((int64_t)col + adjusts[i].c, (int64_t)cols)];
     }
 
     return living;
@@ -55,45 +44,42 @@ size_t alive_neighbors(
 bool rule_1(
     const size_t row, const size_t col,
     const size_t rows, const size_t cols,
-    const char board[rows][cols])
+    const bool board[rows][cols])
 {
-    return alive(row, col, rows, cols, board) && alive_neighbors(row, col, rows, cols, board) < 2;
+    return board[row][col] && alive_neighbors(row, col, rows, cols, board) < 2;
 }
 
 bool rule_2(
     const size_t row, const size_t col,
     const size_t rows, const size_t cols,
-    const char board[rows][cols])
+    const bool board[rows][cols])
 {
     const size_t neighbors = alive_neighbors(row, col, rows, cols, board);
-    return  alive(row, col, rows, cols, board)
-        &&  (neighbors == 2 || neighbors == 3);
+    return board[row][col] && (neighbors == 2 || neighbors == 3);
 }
 
 bool rule_3(
     const size_t row, const size_t col,
     const size_t rows, const size_t cols,
-    const char board[rows][cols])
+    const bool board[rows][cols])
 {
-    return  alive(row, col, rows, cols, board)
-        &&  alive_neighbors(row, col, rows, cols, board) > 3;
+    return board[row][col] && alive_neighbors(row, col, rows, cols, board) > 3;
 }
 
 bool rule_4(
     const size_t row, const size_t col,
     const size_t rows, const size_t cols,
-    const char board[rows][cols])
+    const bool board[rows][cols])
 {
-    return  !alive(row, col, rows, cols, board) 
-        &&  alive_neighbors(row, col, rows, cols, board) == 3;
+    return !board[row][col] && alive_neighbors(row, col, rows, cols, board) == 3;
 }
 
 void update_board(
     const size_t rows, const size_t cols,
-    char in_out_board[rows][cols])
+    bool in_out_board[rows][cols])
 {
-    char original_board[rows][cols];
-    memcpy(original_board, in_out_board, sizeof(char) * rows * cols);
+    bool original_board[rows][cols];
+    memcpy(original_board, in_out_board, sizeof(bool) * rows * cols);
 
     for (size_t row = 0; row < rows; row++)
     {
@@ -102,12 +88,12 @@ void update_board(
             if (rule_1(row, col, rows, cols, original_board) ||
                 rule_3(row, col, rows, cols, original_board))
             {
-                in_out_board[row][col] = off;
+                in_out_board[row][col] = false;
             }
             else if (rule_2(row, col, rows, cols, original_board) ||
                     rule_4(row, col, rows, cols, original_board))
             {
-                in_out_board[row][col] = on;
+                in_out_board[row][col] = true;
             }
         }
     }
@@ -115,16 +101,17 @@ void update_board(
 
 void print_board(
     const size_t rows, const size_t cols,
-    const char board[rows][cols])
+    const bool board[rows][cols])
 {
+    const char alive_dead_display[] = { '*', '@' };
     for (size_t row = 0; row < rows; row++)
     {
         for (size_t col = 0; col < cols; col++)
         {
-            printf("%c", board[row][col]);
+            printw("%c", alive_dead_display[board[row][col]]);
         }
 
-        printf("\n");
+        printw("\n");
     }
 }
 
@@ -135,39 +122,44 @@ int main(int argc, char** argv)
     const size_t cols = 40;
     const size_t rows = 20;
 
-    char board[rows][cols];
+    bool board[rows][cols];
     memset(board, '*', rows * cols);
 
     // small exploder
-    board[7][10] = on;
-    board[8][9] = on;
-    board[8][10] = on;
-    board[8][11] = on;
-    board[9][9] = on;
-    board[9][11] = on;
-    board[10][10] = on;
+    // board[7][10] = true;
+    // board[8][9] = true;
+    // board[8][10] = true;
+    // board[8][11] = true;
+    // board[9][9] = true;
+    // board[9][11] = true;
+    // board[10][10] = true;
 
     // exploder
-    // board[10][20] = on;
-    // board[11][20] = on;
-    // board[12][20] = on;
-    // board[13][20] = on;
-    // board[14][20] = on;
-    // board[10][24] = on;
-    // board[11][24] = on;
-    // board[12][24] = on;
-    // board[13][24] = on;
-    // board[14][24] = on;
-    // board[10][22] = on;
-    // board[14][22] = on;
+    board[8][17] = true;
+    board[9][17] = true;
+    board[10][17] = true;
+    board[11][17] = true;
+    board[12][17] = true;
+    board[8][21] = true;
+    board[9][21] = true;
+    board[10][21] = true;
+    board[11][21] = true;
+    board[12][21] = true;
+    board[8][19] = true;
+    board[12][19] = true;
+
+    initscr();
 
     for (;;) {
         print_board(rows, cols, board);
+        refresh();
         update_board(rows, cols, board);
         // getchar(); // for debugging
         usleep(200000);
-        system("clear");
+        clear();
     }
+
+    endwin();
 
     return 0;
 }
