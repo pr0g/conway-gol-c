@@ -123,7 +123,7 @@ int main(int argc, char** argv)
     const size_t rows = 20;
 
     bool board[rows][cols];
-    memset(board, '*', rows * cols);
+    memset(board, 0, rows * cols);
 
     // small exploder
     // board[7][10] = true;
