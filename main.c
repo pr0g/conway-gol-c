@@ -3,7 +3,10 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+
+size_t elem_rc(const size_t row, const size_t col, const size_t cols) {
+  return row * cols + col;
+}
 
 size_t try_wrap(const int64_t index, const int64_t dim) {
   return (index + dim) % dim;
@@ -11,7 +14,7 @@ size_t try_wrap(const int64_t index, const int64_t dim) {
 
 size_t alive_neighbors(
   const size_t row, const size_t col, const size_t rows, const size_t cols,
-  const bool board[rows][cols]) {
+  const bool board[]) {
   typedef struct adjust_t {
     int64_t c;
     int64_t r;
@@ -24,8 +27,9 @@ size_t alive_neighbors(
 
   size_t living = 0;
   for (size_t i = 0; i < 8; i++) {
-    living += board[try_wrap((int64_t)row + adjusts[i].r, (int64_t)rows)]
-                   [try_wrap((int64_t)col + adjusts[i].c, (int64_t)cols)];
+    living += board[elem_rc(
+      try_wrap((int64_t)row + adjusts[i].r, (int64_t)rows),
+      try_wrap((int64_t)col + adjusts[i].c, (int64_t)cols), cols)];
   }
 
   return living;
@@ -33,54 +37,56 @@ size_t alive_neighbors(
 
 bool rule_1(
   const size_t row, const size_t col, const size_t rows, const size_t cols,
-  const bool board[rows][cols]) {
-  return board[row][col] && alive_neighbors(row, col, rows, cols, board) < 2;
+  const bool board[]) {
+  return board[elem_rc(row, col, cols)]
+      && alive_neighbors(row, col, rows, cols, board) < 2;
 }
 
 bool rule_2(
   const size_t row, const size_t col, const size_t rows, const size_t cols,
-  const bool board[rows][cols]) {
+  const bool board[]) {
   const size_t neighbors = alive_neighbors(row, col, rows, cols, board);
-  return board[row][col] && (neighbors == 2 || neighbors == 3);
+  return board[elem_rc(row, col, cols)] && (neighbors == 2 || neighbors == 3);
 }
 
 bool rule_3(
   const size_t row, const size_t col, const size_t rows, const size_t cols,
-  const bool board[rows][cols]) {
-  return board[row][col] && alive_neighbors(row, col, rows, cols, board) > 3;
+  const bool board[]) {
+  return board[elem_rc(row, col, cols)]
+      && alive_neighbors(row, col, rows, cols, board) > 3;
 }
 
 bool rule_4(
   const size_t row, const size_t col, const size_t rows, const size_t cols,
-  const bool board[rows][cols]) {
-  return !board[row][col] && alive_neighbors(row, col, rows, cols, board) == 3;
+  const bool board[]) {
+  return !board[elem_rc(row, col, cols)]
+      && alive_neighbors(row, col, rows, cols, board) == 3;
 }
 
-void update_board(
-  const size_t rows, const size_t cols, bool in_out_board[rows][cols]) {
-  bool original_board[rows][cols];
+void update_board(const size_t rows, const size_t cols, bool in_out_board[]) {
+  bool* original_board = malloc(rows * cols);
   memcpy(original_board, in_out_board, sizeof(bool) * rows * cols);
   for (size_t row = 0; row < rows; row++) {
     for (size_t col = 0; col < cols; col++) {
       if (
         rule_1(row, col, rows, cols, original_board)
         || rule_3(row, col, rows, cols, original_board)) {
-        in_out_board[row][col] = false;
+        in_out_board[elem_rc(row, col, cols)] = false;
       } else if (
         rule_2(row, col, rows, cols, original_board)
         || rule_4(row, col, rows, cols, original_board)) {
-        in_out_board[row][col] = true;
+        in_out_board[elem_rc(row, col, cols)] = true;
       }
     }
   }
+  free(original_board);
 }
 
-void print_board(
-  const size_t rows, const size_t cols, const bool board[rows][cols]) {
+void print_board(const size_t rows, const size_t cols, const bool board[]) {
   const char alive_dead_display[] = {'*', '@'};
   for (size_t row = 0; row < rows; row++) {
     for (size_t col = 0; col < cols; col++) {
-      printf("%c", alive_dead_display[board[row][col]]);
+      printf("%c", alive_dead_display[board[elem_rc(row, col, cols)]]);
     }
     printf("\n");
   }
@@ -90,10 +96,10 @@ int main(int argc, char** argv) {
   (void)argc;
   (void)argv;
 
-  const size_t cols = 40;
-  const size_t rows = 20;
+  enum { cols = 40 };
+  enum { rows = 20 };
 
-  bool board[rows][cols];
+  bool board[rows * cols];
   memset(board, 0, rows * cols);
 
   // small exploder
@@ -120,18 +126,17 @@ int main(int argc, char** argv) {
   // board[12][19] = true;
 
   // glider
-  board[10][7] = true;
-  board[11][8] = true;
-  board[11][9] = true;
-  board[10][9] = true;
-  board[9][9] = true;
+  board[elem_rc(10, 7, cols)] = true;
+  board[elem_rc(11, 8, cols)] = true;
+  board[elem_rc(11, 9, cols)] = true;
+  board[elem_rc(10, 9, cols)] = true;
+  board[elem_rc(9, 9, cols)] = true;
 
   for (;;) {
-    printf("\e[H\e[2J\e[3J");
+    printf("\33[H\33[2J\33[3J");
     print_board(rows, cols, board);
     update_board(rows, cols, board);
-    // getchar(); // for debugging
-    usleep(200000);
+    getchar();
   }
 
   return 0;
