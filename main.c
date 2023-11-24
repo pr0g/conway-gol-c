@@ -16,22 +16,19 @@ size_t alive_neighbors(
   const size_t row, const size_t col, const size_t rows, const size_t cols,
   const bool board[]) {
   typedef struct adjust_t {
-    int64_t c;
     int64_t r;
+    int64_t c;
   } adjust_t;
-
-  const adjust_t adjusts[] = {{.c = -1, .r = 0}, {.c = -1, .r = -1},
-                              {.c = 0, .r = -1}, {.c = 1, .r = -1},
-                              {.c = 1, .r = 0},  {.c = 1, .r = 1},
-                              {.c = 0, .r = 1},  {.c = -1, .r = 1}};
-
+  const adjust_t adjusts[] = {{.r = 0, .c = -1}, {.r = -1, .c = -1},
+                              {.r = -1, .c = 0}, {.r = -1, .c = 1},
+                              {.r = 0, .c = 1},  {.r = 1, .c = 1},
+                              {.r = 1, .c = 0},  {.r = 1, .c = -1}};
   size_t living = 0;
   for (size_t i = 0; i < 8; i++) {
     living += board[elem_rc(
       try_wrap((int64_t)row + adjusts[i].r, (int64_t)rows),
       try_wrap((int64_t)col + adjusts[i].c, (int64_t)cols), cols)];
   }
-
   return living;
 }
 
@@ -103,27 +100,27 @@ int main(int argc, char** argv) {
   memset(board, 0, rows * cols);
 
   // small exploder
-  // board[7][10] = true;
-  // board[8][9] = true;
-  // board[8][10] = true;
-  // board[8][11] = true;
-  // board[9][9] = true;
-  // board[9][11] = true;
-  // board[10][10] = true;
+  // board[elem_rc(7, 10, cols)] = true;
+  // board[elem_rc(8, 9, cols)] = true;
+  // board[elem_rc(8, 10, cols)] = true;
+  // board[elem_rc(8, 11, cols)] = true;
+  // board[elem_rc(9, 9, cols)] = true;
+  // board[elem_rc(9, 11, cols)] = true;
+  // board[elem_rc(10, 10, cols)] = true;
 
   // exploder
-  // board[8][17] = true;
-  // board[9][17] = true;
-  // board[10][17] = true;
-  // board[11][17] = true;
-  // board[12][17] = true;
-  // board[8][21] = true;
-  // board[9][21] = true;
-  // board[10][21] = true;
-  // board[11][21] = true;
-  // board[12][21] = true;
-  // board[8][19] = true;
-  // board[12][19] = true;
+  // board[elem_rc(8, 17, cols)] = true;
+  // board[elem_rc(9, 17, cols)] = true;
+  // board[elem_rc(10, 17, cols)] = true;
+  // board[elem_rc(11, 17, cols)] = true;
+  // board[elem_rc(12, 17, cols)] = true;
+  // board[elem_rc(8, 21, cols)] = true;
+  // board[elem_rc(9, 21, cols)] = true;
+  // board[elem_rc(10, 21, cols)] = true;
+  // board[elem_rc(11, 21, cols)] = true;
+  // board[elem_rc(12, 21, cols)] = true;
+  // board[elem_rc(8, 19, cols)] = true;
+  // board[elem_rc(12, 19, cols)] = true;
 
   // glider
   board[elem_rc(10, 7, cols)] = true;
