@@ -111,6 +111,7 @@ int main(int argc, char** argv) {
   bool board[rows * cols];
   memset(board, 0, rows * cols);
 
+  // gosper glider gun
   board[elem_rc(5, 2, cols)] = true;
   board[elem_rc(6, 2, cols)] = true;
   board[elem_rc(5, 3, cols)] = true;
