@@ -105,8 +105,8 @@ int main(int argc, char** argv) {
   (void)argc;
   (void)argv;
 
-  enum { cols = 80 };
-  enum { rows = 35 };
+  enum { cols = 40 };
+  enum { rows = 27 };
 
   bool board[rows * cols];
   memset(board, 0, rows * cols);
@@ -151,6 +151,22 @@ int main(int argc, char** argv) {
   board[elem_rc(4, 36, cols)] = true;
   board[elem_rc(3, 37, cols)] = true;
   board[elem_rc(4, 37, cols)] = true;
+
+  // eater
+  board[elem_rc(20, 27, cols)] = true;
+  board[elem_rc(21, 27, cols)] = true;
+  board[elem_rc(20, 28, cols)] = true;
+  board[elem_rc(21, 28, cols)] = true;
+
+  board[elem_rc(21, 32, cols)] = true;
+  board[elem_rc(22, 31, cols)] = true;
+  board[elem_rc(22, 33, cols)] = true;
+  board[elem_rc(23, 32, cols)] = true;
+
+  board[elem_rc(23, 34, cols)] = true;
+  board[elem_rc(24, 34, cols)] = true;
+  board[elem_rc(25, 34, cols)] = true;
+  board[elem_rc(25, 35, cols)] = true;
 
   // small exploder
   // board[elem_rc(7, 10, cols)] = true;
