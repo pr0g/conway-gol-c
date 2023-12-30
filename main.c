@@ -33,7 +33,7 @@ size_t alive_neighbors(
   return living;
 }
 
-// Any live cell with fewer than two live neighbors dies, as if by
+// any live cell with fewer than two live neighbors dies, as if by
 // underpopulation.
 bool rule_1(
   const size_t row, const size_t col, const size_t rows, const size_t cols,
@@ -42,7 +42,7 @@ bool rule_1(
       && alive_neighbors(row, col, rows, cols, board) < 2;
 }
 
-// Any live cell with two or three live neighbors lives on to the next
+// any live cell with two or three live neighbors lives on to the next
 // generation.
 bool rule_2(
   const size_t row, const size_t col, const size_t rows, const size_t cols,
@@ -51,7 +51,7 @@ bool rule_2(
   return board[elem_rc(row, col, cols)] && (neighbors == 2 || neighbors == 3);
 }
 
-// Any live cell with more than three live neighbors dies, as if by
+// any live cell with more than three live neighbors dies, as if by
 // overpopulation.
 bool rule_3(
   const size_t row, const size_t col, const size_t rows, const size_t cols,
@@ -60,7 +60,7 @@ bool rule_3(
       && alive_neighbors(row, col, rows, cols, board) > 3;
 }
 
-// Any dead cell with exactly three live neighbors becomes a live cell, as if by
+// any dead cell with exactly three live neighbors becomes a live cell, as if by
 // reproduction.
 bool rule_4(
   const size_t row, const size_t col, const size_t rows, const size_t cols,
