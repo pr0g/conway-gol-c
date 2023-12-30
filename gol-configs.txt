@@ -1,0 +1,29 @@
+// small exploder
+board[elem_rc(7, 10, cols)] = true;
+board[elem_rc(8, 9, cols)] = true;
+board[elem_rc(8, 10, cols)] = true;
+board[elem_rc(8, 11, cols)] = true;
+board[elem_rc(9, 9, cols)] = true;
+board[elem_rc(9, 11, cols)] = true;
+board[elem_rc(10, 10, cols)] = true;
+
+// exploder
+board[elem_rc(8, 17, cols)] = true;
+board[elem_rc(9, 17, cols)] = true;
+board[elem_rc(10, 17, cols)] = true;
+board[elem_rc(11, 17, cols)] = true;
+board[elem_rc(12, 17, cols)] = true;
+board[elem_rc(8, 21, cols)] = true;
+board[elem_rc(9, 21, cols)] = true;
+board[elem_rc(10, 21, cols)] = true;
+board[elem_rc(11, 21, cols)] = true;
+board[elem_rc(12, 21, cols)] = true;
+board[elem_rc(8, 19, cols)] = true;
+board[elem_rc(12, 19, cols)] = true;
+
+// glider
+board[elem_rc(10, 7, cols)] = true;
+board[elem_rc(11, 8, cols)] = true;
+board[elem_rc(11, 9, cols)] = true;
+board[elem_rc(10, 9, cols)] = true;
+board[elem_rc(9, 9, cols)] = true;
