@@ -9,7 +9,7 @@ size_t elem_rc(const size_t row, const size_t col, const size_t cols) {
 }
 
 size_t try_wrap(const int64_t index, const int64_t dim) {
-  return (index + dim) % dim;
+  return ((index % dim) + dim) % dim;
 }
 
 size_t alive_neighbors(
@@ -24,7 +24,8 @@ size_t alive_neighbors(
                               {.r = 0, .c = 1},  {.r = 1, .c = 1},
                               {.r = 1, .c = 0},  {.r = 1, .c = -1}};
   size_t living = 0;
-  for (size_t i = 0; i < 8; i++) {
+  for (size_t i = 0, count = sizeof(adjusts) / sizeof(adjust_t); i < count;
+       i++) {
     living += board[elem_rc(
       try_wrap((int64_t)row + adjusts[i].r, (int64_t)rows),
       try_wrap((int64_t)col + adjusts[i].c, (int64_t)cols), cols)];
@@ -32,6 +33,8 @@ size_t alive_neighbors(
   return living;
 }
 
+// Any live cell with fewer than two live neighbors dies, as if by
+// underpopulation.
 bool rule_1(
   const size_t row, const size_t col, const size_t rows, const size_t cols,
   const bool board[]) {
@@ -39,6 +42,8 @@ bool rule_1(
       && alive_neighbors(row, col, rows, cols, board) < 2;
 }
 
+// Any live cell with two or three live neighbors lives on to the next
+// generation.
 bool rule_2(
   const size_t row, const size_t col, const size_t rows, const size_t cols,
   const bool board[]) {
@@ -46,6 +51,8 @@ bool rule_2(
   return board[elem_rc(row, col, cols)] && (neighbors == 2 || neighbors == 3);
 }
 
+// Any live cell with more than three live neighbors dies, as if by
+// overpopulation.
 bool rule_3(
   const size_t row, const size_t col, const size_t rows, const size_t cols,
   const bool board[]) {
@@ -53,6 +60,8 @@ bool rule_3(
       && alive_neighbors(row, col, rows, cols, board) > 3;
 }
 
+// Any dead cell with exactly three live neighbors becomes a live cell, as if by
+// reproduction.
 bool rule_4(
   const size_t row, const size_t col, const size_t rows, const size_t cols,
   const bool board[]) {
@@ -98,29 +107,6 @@ int main(int argc, char** argv) {
 
   bool board[rows * cols];
   memset(board, 0, rows * cols);
-
-  // small exploder
-  // board[elem_rc(7, 10, cols)] = true;
-  // board[elem_rc(8, 9, cols)] = true;
-  // board[elem_rc(8, 10, cols)] = true;
-  // board[elem_rc(8, 11, cols)] = true;
-  // board[elem_rc(9, 9, cols)] = true;
-  // board[elem_rc(9, 11, cols)] = true;
-  // board[elem_rc(10, 10, cols)] = true;
-
-  // exploder
-  // board[elem_rc(8, 17, cols)] = true;
-  // board[elem_rc(9, 17, cols)] = true;
-  // board[elem_rc(10, 17, cols)] = true;
-  // board[elem_rc(11, 17, cols)] = true;
-  // board[elem_rc(12, 17, cols)] = true;
-  // board[elem_rc(8, 21, cols)] = true;
-  // board[elem_rc(9, 21, cols)] = true;
-  // board[elem_rc(10, 21, cols)] = true;
-  // board[elem_rc(11, 21, cols)] = true;
-  // board[elem_rc(12, 21, cols)] = true;
-  // board[elem_rc(8, 19, cols)] = true;
-  // board[elem_rc(12, 19, cols)] = true;
 
   // glider
   board[elem_rc(10, 7, cols)] = true;
